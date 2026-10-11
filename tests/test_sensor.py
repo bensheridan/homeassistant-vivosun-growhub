@@ -665,3 +665,17 @@ async def test_sensor_vgrow_water_values_unknown_without_dwc_sensor(hass: HomeAs
 
     assert next(e for e in added if e.unique_id.endswith("_waterLv")).native_value is None
     assert next(e for e in added if e.unique_id.endswith("_waterT")).native_value is None
+
+
+async def test_sensor_vgrow_water_values_preserve_zero_and_ignore_sentinels(hass: HomeAssistant) -> None:
+    coordinator = _StubCoordinator(client_id=_VGROW_CLIENT_ID)
+    coordinator.data = {"sensors": {_DEV_ID: {"waterLv": 0, "waterT": 0}}}
+    added = await _setup_entities(hass, coordinator)
+    water_level = next(e for e in added if e.unique_id.endswith("_waterLv"))
+    water_temp = next(e for e in added if e.unique_id.endswith("_waterT"))
+    assert water_level.native_value == 0.0
+    assert water_temp.native_value == 0.0
+
+    coordinator.data = {"sensors": {_DEV_ID: {"waterLv": -6666, "waterT": -6666}}}
+    assert water_level.native_value is None
+    assert water_temp.native_value is None

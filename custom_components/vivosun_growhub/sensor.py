@@ -340,7 +340,7 @@ class VivosunChannelSensorEntity(CoordinatorEntity[VivosunCoordinator], SensorEn
             value = sensors.get(key)
             if isinstance(value, bool):
                 continue
-            if isinstance(value, int):
+            if isinstance(value, int) and value != SENSOR_UNAVAILABLE_SENTINEL:
                 return value
         return None
 
